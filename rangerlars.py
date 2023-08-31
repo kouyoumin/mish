@@ -74,9 +74,9 @@ class RangerLars(Optimizer):
 
                 # Decay the first and second moment running average coefficient
                 # m_t
-                exp_avg.mul_(beta1).add_(1 - beta1, grad)
+                exp_avg.mul_(beta1).add_(grad, alpha = 1 - beta1)
                 # v_t
-                exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+                exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value = 1 - beta2)
 
                 state['step'] += 1
                 buffered = self.buffer[int(state['step'] % 10)]
@@ -102,10 +102,10 @@ class RangerLars(Optimizer):
                     denom = exp_avg_sq.sqrt().add_(group['eps'])
                     update.addcdiv_(radam_step_size, exp_avg, denom)
                 else:
-                    update.add_(radam_step_size, exp_avg)
+                    update.add_(exp_avg, alpha = radam_step_size)
 
                 if group['weight_decay'] != 0:
-                    update.add_(group['weight_decay'], p_data_fp32)
+                    update.add_(p_data_fp32, alpha = group['weight_decay'])
 
                 radam_norm = update.pow(2).sum().sqrt()
                 weight_norm = p.data.pow(2).sum().sqrt()
@@ -133,7 +133,7 @@ class RangerLars(Optimizer):
                 if p.grad is None:
                     continue
                 #at k interval: take the difference of (RAdam params - LookAhead params) * LookAhead alpha param
-                q.data.add_(self.alpha,p.data - q.data) 
+                q.data.add_(p.data - q.data, alpha = self.alpha)
                 #update RAdam weights with the interpolated weights
                 p.data.copy_(q.data)        
             
