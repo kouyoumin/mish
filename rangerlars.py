@@ -114,7 +114,7 @@ class RangerLars(Optimizer):
                 else:
                     trust_ratio = weight_norm / radam_norm
 
-                trust_ratio = max(0, min(10, trust_ratio))
+                trust_ratio = max(1, min(10, trust_ratio))
 
                 state['weight_norm'] = weight_norm
                 state['adam_norm'] = radam_norm
