@@ -100,7 +100,7 @@ class RangerLars(Optimizer):
                 update = torch.zeros_like(p_data_fp32)
                 if N_sma >= 5:
                     denom = exp_avg_sq.sqrt().add_(group['eps'])
-                    update.addcdiv_(radam_step_size, exp_avg, denom)
+                    update.addcdiv_(exp_avg, denom, value = radam_step_size)
                 else:
                     update.add_(exp_avg, alpha = radam_step_size)
 
